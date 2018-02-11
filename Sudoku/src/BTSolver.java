@@ -119,8 +119,8 @@ public class BTSolver
 	private Variable getMRV ( )
 	{	
 		Variable newvar = null;
-		int row,col;
-		/*
+		int row,col, block;
+		
 		for (Variable v : network.getVariables())
 		{
 			//Go through each assigned variable and chooses its value
@@ -129,18 +129,20 @@ public class BTSolver
 				//System.out.println(v.getName() + " Domains:" + v.getDomain());
 				row = v.row();
 				col = v.col();
+				block = v.block();
 				List<Integer> val = v.getValues();
+				
 				//Go through each variable and removes the value that doesn't satisfy the constraint
 				for (Variable v2 : network.getVariables())
 				{
 					if (!v2.isAssigned())
 					{
-						if (v2.row() == row || v2.col() == col)
+						if (v2.row() == row || v2.col() == col || v2.block() == block)
 							v2.removeValueFromDomain(val.get(0));
 					}
 				}
 			}
-		}*/
+		}
 		
 		//Go to each variable if the variable size is not assigned sends it to the solve 
 		for(Variable v : network.getVariables())
