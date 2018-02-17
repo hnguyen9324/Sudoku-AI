@@ -62,28 +62,26 @@ public class BTSolver
 	 */
 	private boolean forwardChecking ( )
 	{
-		/* foreach constraint in neighbor_constraints:
-			Y = constraint.get_Y()
-			skip if Y is already assigned
-			foreach y in Y.get_domain()
-			if check_constraint(constraint, X=x, Y=y) fails
-			reduce Y's domain by removing y.
-			if Y's domain is empty return fail
-			return success
-			forward_checking_with_prop_th
-		 */
+		//Go through each variable and assign a value and check for consistency
 		for (Variable v: network.getVariables())
 		{
-			if (!v.isAssigned())
-			{
-				//check neighbor and removes from neighbor
-				for (Variable v2: network.getNeighborsOfVariable(v))
+			if (v.isAssigned())
+			{	
+				//check the neighbor of var v and removes value from its from neighbor
+				for (Variable neighborVar: network.getNeighborsOfVariable(v))
 				{
-					System.out.println("Variable:" + v2.getDomain());
+					//Check if variable v value is the same as its neighbor 
+					if (neighborVar.getAssignment() == v.getAssignment())
+						return false;
+					//Push variable to the stack 
+					trail.push(neighborVar);
+					//Eliminate variable from its neighbor
+					neighborVar.removeValueFromDomain(v.getAssignment());
+					//if variable 2 neighbor has no value after remove, then it is not consistent
+					if (neighborVar.getDomain().size() == 0)
+						return false;
 				}
 			}
-			else
-				v.removeValueFromDomain(v.getAssignment());
 		}
 		return true;
 	}
