@@ -62,7 +62,30 @@ public class BTSolver
 	 */
 	private boolean forwardChecking ( )
 	{
-		return false;
+		/* foreach constraint in neighbor_constraints:
+			Y = constraint.get_Y()
+			skip if Y is already assigned
+			foreach y in Y.get_domain()
+			if check_constraint(constraint, X=x, Y=y) fails
+			reduce Y's domain by removing y.
+			if Y's domain is empty return fail
+			return success
+			forward_checking_with_prop_th
+		 */
+		for (Variable v: network.getVariables())
+		{
+			if (!v.isAssigned())
+			{
+				//check neighbor and removes from neighbor
+				for (Variable v2: network.getNeighborsOfVariable(v))
+				{
+					System.out.println("Variable:" + v2.getDomain());
+				}
+			}
+			else
+				v.removeValueFromDomain(v.getAssignment());
+		}
+		return true;
 	}
 
 	/**
@@ -118,44 +141,22 @@ public class BTSolver
 	 */
 	private Variable getMRV ( )
 	{	
-		Variable newvar = null;
-		int row,col, block;
-		
-		for (Variable v : network.getVariables())
+		Variable unassignedVar = null;
+		int mrv = 99999;
+		//Go through each variable and find the min variable size
+		//Select the smallest domain size and return
+		for(Variable v : network.getVariables())
 		{
-			//Go through each assigned variable and chooses its value
-			if (!v.isChangeable())
+			if (!v.isAssigned())
 			{
-				//System.out.println(v.getName() + " Domains:" + v.getDomain());
-				row = v.row();
-				col = v.col();
-				block = v.block();
-				List<Integer> val = v.getValues();
-				
-				//Go through each variable and removes the value that doesn't satisfy the constraint
-				for (Variable v2 : network.getVariables())
+				if(v.getDomain().size() < mrv)
 				{
-					if (!v2.isAssigned())
-					{
-						if (v2.row() == row || v2.col() == col || v2.block() == block)
-							v2.removeValueFromDomain(val.get(0));
-					}
+					unassignedVar = v;
+					mrv = v.getDomain().size();
 				}
 			}
 		}
-		
-		//Go to each variable if the variable size is not assigned sends it to the solve 
-		for(Variable v : network.getVariables())
-		{
-			if(!v.isAssigned())
-			{
-				//System.out.println("New Var: " +v.getName() + " Domains:" + v.getDomain());
-				newvar = v;
-				break;
-			}
-		}
-		return newvar;
-		//return null;
+		return unassignedVar;
 	}
 
 	/**
@@ -240,7 +241,7 @@ public class BTSolver
 	// Engine Functions
 	//==================================================================
 
-	public void solve ( )
+	public void solve ()
 	{
 		if ( hasSolution )
 			return;
