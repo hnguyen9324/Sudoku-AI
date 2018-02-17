@@ -67,7 +67,7 @@ public class BTSolver
 		{
 			if (v.isAssigned())
 			{	
-				//check the neighbor of var v and removes value from its from neighbor
+				//check the neighbor of variable v and removes value from its from neighbor
 				for (Variable neighborVar: network.getNeighborsOfVariable(v))
 				{
 					//Check if variable v value is the same as its neighbor 
@@ -77,7 +77,7 @@ public class BTSolver
 					trail.push(neighborVar);
 					//Eliminate variable from its neighbor
 					neighborVar.removeValueFromDomain(v.getAssignment());
-					//if variable 2 neighbor has no value after remove, then it is not consistent
+					//if neighbor variable has no value after remove, then it is not consistent
 					if (neighborVar.getDomain().size() == 0)
 						return false;
 				}
@@ -140,18 +140,27 @@ public class BTSolver
 	private Variable getMRV ( )
 	{	
 		Variable unassignedVar = null;
-		int mrv = 99999;
+		int mrv = 0;
+		int neighborCount = 0;
 		//Go through each variable and find the min variable size
 		//Select the smallest domain size and return
 		for(Variable v : network.getVariables())
-		{
+		{	
 			if (!v.isAssigned())
 			{
-				if(v.getDomain().size() < mrv)
+				//Go through the neighbors of the unassigned variable
+				for (Variable neighborVar : network.getNeighborsOfVariable(v))
+				{
+					if (neighborVar.isAssigned())
+						neighborCount++;
+				}
+				//Pick the unassigned variable with highest assigned neighbor
+				if (neighborCount > mrv)
 				{
 					unassignedVar = v;
-					mrv = v.getDomain().size();
+					mrv = neighborCount;
 				}
+				neighborCount = 0;
 			}
 		}
 		return unassignedVar;
