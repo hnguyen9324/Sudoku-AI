@@ -252,24 +252,23 @@ public class BTSolver
 			domainMap.put(val, count);
 		}
 		//Convert Map to List of Map
-        List<Map.Entry<Integer, Integer>> list =
-                new LinkedList<Map.Entry<Integer, Integer>>(domainMap.entrySet());
-        
-        
-        //Sort list with Collections.sort(), provide a custom Comparator
-        //Try switch the i1 i2 position in ascending order
-        Collections.sort(list, new Comparator<Map.Entry<Integer, Integer>>() {
-            public int compare(Map.Entry<Integer, Integer> i1,
-                               Map.Entry<Integer, Integer> i2) {
-                return (i1.getValue()).compareTo(i2.getValue());
-            }
-        });
+		List<Map.Entry<Integer, Integer>> list =
+			new LinkedList<Map.Entry<Integer, Integer>>(domainMap.entrySet());
+		
+		//Sort list with Collections.sort(), provide a custom Comparator
+		//Try switch the i1 i2 position in ascending order
+		Collections.sort(list, new Comparator<Map.Entry<Integer, Integer>>() {
+		    public int compare(Map.Entry<Integer, Integer> i1,
+				       Map.Entry<Integer, Integer> i2) {
+			return (i1.getValue()).compareTo(i2.getValue());
+		    }
+		});
 
-        //Loop the sorted list and put it into a new insertion order Map LinkedHashMap
-        Map<Integer, Integer> sortedMap = new LinkedHashMap<Integer, Integer>();
-        for (Map.Entry<Integer, Integer> entry : list) {
-            sortedLCV.add(entry.getKey());
-        }
+		//Loop the sorted list and put it into a new insertion order Map LinkedHashMap
+		Map<Integer, Integer> sortedMap = new LinkedHashMap<Integer, Integer>();
+		for (Map.Entry<Integer, Integer> entry : list) {
+		    sortedLCV.add(entry.getKey());
+		}
 		return sortedLCV;
 	}
 
