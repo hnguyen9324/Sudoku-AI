@@ -68,7 +68,7 @@ public class BTSolver
 	{
 		//Go through each variable and assign a value and check for consistency
 		for (Variable v: network.getVariables())
-		{
+		{	
 			if (v.isAssigned())
 			{	
 				//check the neighbor of variable v and removes value from its from neighbor
@@ -77,10 +77,13 @@ public class BTSolver
 					//Check if variable v value is the same as its neighbor 
 					if (neighborVar.getAssignment() == v.getAssignment())
 						return false;
-					//Push variable to the stack 
-					trail.push(neighborVar);
-					//Eliminate variable from its neighbor
-					neighborVar.removeValueFromDomain(v.getAssignment());
+					else if (!neighborVar.isAssigned())
+					{
+						//Push variable to the stack
+						trail.push(neighborVar);
+						//Eliminate variable from its neighbor
+						neighborVar.removeValueFromDomain(v.getAssignment());
+					}
 					//if neighbor variable has no value after remove, then it is not consistent
 					if (neighborVar.getDomain().size() == 0)
 						return false;
@@ -271,7 +274,6 @@ public class BTSolver
 		});
 
 		//Loop the sorted list and put it into a new insertion order Map LinkedHashMap
-		Map<Integer, Integer> sortedMap = new LinkedHashMap<Integer, Integer>();
 		for (Map.Entry<Integer, Integer> entry : list) {
 		    sortedLCV.add(entry.getKey());
 		}
