@@ -74,7 +74,6 @@ public class BTSolver
 				//check the neighbor of variable v and removes value from its from neighbor
 				for (Variable neighborVar: network.getNeighborsOfVariable(v))
 				{
-					List<Constraint> list = network.getModifiedConstraints();
 					//Check if variable v value is the same as its neighbor 
 					if (neighborVar.getAssignment() == v.getAssignment())
 						return false;
@@ -143,7 +142,7 @@ public class BTSolver
 	 * Return: The unassigned variable with the smallest domain
 	 */
 	private Variable getMRV ( )
-	{	
+	{
 		Variable unassignedVar = null;
 		int mrv = 0;
 		int neighborCount = 0;
@@ -227,7 +226,7 @@ public class BTSolver
 	/**
 	 * Part 1 TODO: Implement the Least Constraining Value Heuristic
 	 *
-	 * The Least constraining value is the one that will knock the most
+	 * The Least constraining value is the one that will knock the least
 	 * values out of it's neighbors domain.
 	 *
 	 * Return: A list of v's domain sorted by the LCV heuristic
@@ -245,7 +244,14 @@ public class BTSolver
 			for (Variable neighborVar: network.getNeighborsOfVariable(v))
 			{
 				if (!neighborVar.isAssigned())
-					count++;
+				{
+					for (Integer v2: neighborVar.getDomain())
+					{
+						if (v2 == val)
+							count++;
+					}
+					
+				}
 				else if (neighborVar.getValues().get(0) == val)
 					count++;
 			}
@@ -287,7 +293,7 @@ public class BTSolver
 	// Engine Functions
 	//==================================================================
 
-	public void solve ()
+	public void solve ( )
 	{
 		if ( hasSolution )
 			return;
