@@ -78,12 +78,10 @@ public class BTSolver
 					if (neighborVar.getAssignment() == v.getAssignment())
 						return false;
 					else if (!neighborVar.isAssigned())
-					{
-						//Push variable to the stack
-						trail.push(neighborVar);
-						//Eliminate variable from its neighbor
-						neighborVar.removeValueFromDomain(v.getAssignment());
-					}
+						trail.push(neighborVar);//Push variable to the stack
+					
+					//Eliminate variable from its neighbor
+					neighborVar.removeValueFromDomain(v.getAssignment());
 					//if neighbor variable has no value after remove, then it is not consistent
 					if (neighborVar.getDomain().size() == 0)
 						return false;
