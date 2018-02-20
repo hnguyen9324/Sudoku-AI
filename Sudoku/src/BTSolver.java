@@ -67,7 +67,7 @@ public class BTSolver
 =======
 		//Go through each variable and assign a value and check for consistency
 		for (Variable v: network.getVariables())
-		{	
+		{
 			if (v.isAssigned())
 			{	
 				//check the neighbor of variable v and removes value from its from neighbor
@@ -76,13 +76,10 @@ public class BTSolver
 					//Check if variable v value is the same as its neighbor 
 					if (neighborVar.getAssignment() == v.getAssignment())
 						return false;
-					else if (!neighborVar.isAssigned())
-					{
-						//Push variable to the stack
-						trail.push(neighborVar);
-						//Eliminate variable from its neighbor
-						neighborVar.removeValueFromDomain(v.getAssignment());
-					}
+					//Push variable to the stack 
+					trail.push(neighborVar);
+					//Eliminate variable from its neighbor
+					neighborVar.removeValueFromDomain(v.getAssignment());
 					//if neighbor variable has no value after remove, then it is not consistent
 					if (neighborVar.getDomain().size() == 0)
 						return false;
@@ -213,7 +210,52 @@ public class BTSolver
 	 */
 	public List<Integer> getValuesLCVOrder ( Variable v )
 	{
+<<<<<<< HEAD
 		return null;
+=======
+		List<Integer> sortedLCV = new LinkedList<Integer>();
+		Map<Integer,Integer> domainMap = new HashMap<Integer,Integer>();
+		//Traverse every domain in variable
+		for (Integer val: v.getDomain())
+		{
+			int count = 0;
+			//Check its neighbor
+			for (Variable neighborVar: network.getNeighborsOfVariable(v))
+			{
+				if (!neighborVar.isAssigned())
+				{
+					for (Integer v2: neighborVar.getDomain())
+					{
+						if (v2 == val)
+							count++;
+					}
+					
+				}
+				else if (neighborVar.getValues().get(0) == val)
+					count++;
+			}
+			domainMap.put(val, count);
+		}
+		//Convert Map to List of Map
+		List<Map.Entry<Integer, Integer>> list =
+			new LinkedList<Map.Entry<Integer, Integer>>(domainMap.entrySet());
+		
+		//Sort list with Collections.sort(), provide a custom Comparator
+		//Try switch the i1 i2 position in ascending order
+		Collections.sort(list, new Comparator<Map.Entry<Integer, Integer>>() {
+		    public int compare(Map.Entry<Integer, Integer> i1,
+				       Map.Entry<Integer, Integer> i2) {
+			return (i1.getValue()).compareTo(i2.getValue());
+		    }
+		});
+
+		//Loop the sorted list and put it into a new insertion order Map LinkedHashMap
+		Map<Integer, Integer> sortedMap = new LinkedHashMap<Integer, Integer>();
+		for (Map.Entry<Integer, Integer> entry : list) {
+		    sortedLCV.add(entry.getKey());
+		}
+		return sortedLCV;
+>>>>>>> parent of fd6204e... Fix FC to reduce to Assignment count
 	}
 
 	/**
