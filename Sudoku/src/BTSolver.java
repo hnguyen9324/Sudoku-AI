@@ -62,7 +62,35 @@ public class BTSolver
 	 */
 	private boolean forwardChecking ( )
 	{
+<<<<<<< HEAD
 		return false;
+=======
+		//Go through each variable and assign a value and check for consistency
+		for (Variable v: network.getVariables())
+		{	
+			if (v.isAssigned())
+			{	
+				//check the neighbor of variable v and removes value from its from neighbor
+				for (Variable neighborVar: network.getNeighborsOfVariable(v))
+				{
+					//Check if variable v value is the same as its neighbor 
+					if (neighborVar.getAssignment() == v.getAssignment())
+						return false;
+					else if (!neighborVar.isAssigned())
+					{
+						//Push variable to the stack
+						trail.push(neighborVar);
+						//Eliminate variable from its neighbor
+						neighborVar.removeValueFromDomain(v.getAssignment());
+					}
+					//if neighbor variable has no value after remove, then it is not consistent
+					if (neighborVar.getDomain().size() == 0)
+						return false;
+				}
+			}
+		}
+		return true;
+>>>>>>> parent of bbe60ce... fix FC update 1
 	}
 
 	/**
