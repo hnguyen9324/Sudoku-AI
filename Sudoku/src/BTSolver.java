@@ -1,6 +1,9 @@
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class BTSolver
 {
@@ -62,9 +65,6 @@ public class BTSolver
 	 */
 	private boolean forwardChecking ( )
 	{
-<<<<<<< HEAD
-		return false;
-=======
 		//Go through each variable and assign a value and check for consistency
 		for (Variable v: network.getVariables())
 		{
@@ -76,8 +76,9 @@ public class BTSolver
 					//Check if variable v value is the same as its neighbor 
 					if (neighborVar.getAssignment() == v.getAssignment())
 						return false;
-					//Push variable to the stack 
-					trail.push(neighborVar);
+					else if (!neighborVar.isAssigned())
+						trail.push(neighborVar);//Push variable to the stack
+					
 					//Eliminate variable from its neighbor
 					neighborVar.removeValueFromDomain(v.getAssignment());
 					//if neighbor variable has no value after remove, then it is not consistent
@@ -87,7 +88,6 @@ public class BTSolver
 			}
 		}
 		return true;
->>>>>>> parent of bbe60ce... fix FC update 1
 	}
 
 	/**
@@ -143,7 +143,31 @@ public class BTSolver
 	 */
 	private Variable getMRV ( )
 	{
-		return null;
+		Variable unassignedVar = null;
+		int mrv = 0;
+		int neighborCount = 0;
+		//Go through each variable and find the min variable size
+		//Select the smallest domain size and return
+		for(Variable v : network.getVariables())
+		{	
+			if (!v.isAssigned())
+			{
+				//Go through the neighbors of the unassigned variable
+				for (Variable neighborVar : network.getNeighborsOfVariable(v))
+				{
+					if (neighborVar.isAssigned())
+						neighborCount++;
+				}
+				//Pick the unassigned variable with highest assigned neighbor
+				if (neighborCount > mrv)
+				{
+					unassignedVar = v;
+					mrv = neighborCount;
+				}
+				neighborCount = 0;
+			}
+		}
+		return unassignedVar;
 	}
 
 	/**
@@ -210,9 +234,6 @@ public class BTSolver
 	 */
 	public List<Integer> getValuesLCVOrder ( Variable v )
 	{
-<<<<<<< HEAD
-		return null;
-=======
 		List<Integer> sortedLCV = new LinkedList<Integer>();
 		Map<Integer,Integer> domainMap = new HashMap<Integer,Integer>();
 		//Traverse every domain in variable
@@ -250,12 +271,10 @@ public class BTSolver
 		});
 
 		//Loop the sorted list and put it into a new insertion order Map LinkedHashMap
-		Map<Integer, Integer> sortedMap = new LinkedHashMap<Integer, Integer>();
 		for (Map.Entry<Integer, Integer> entry : list) {
 		    sortedLCV.add(entry.getKey());
 		}
 		return sortedLCV;
->>>>>>> parent of fd6204e... Fix FC to reduce to Assignment count
 	}
 
 	/**
