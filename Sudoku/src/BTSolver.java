@@ -1,10 +1,6 @@
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 public class BTSolver
 {
@@ -61,34 +57,12 @@ public class BTSolver
 	 * (1) If a variable is assigned then eliminate that value from
 	 *     the square's neighbors.
 	 *
-	 * Note: remember to trail.push variables before you assign them
+	 * Note: remember to trail.push variables before you change their domain
 	 * Return: true is assignment is consistent, false otherwise
 	 */
 	private boolean forwardChecking ( )
 	{
-		//Go through each variable and assign a value and check for consistency
-		for (Variable v: network.getVariables())
-		{	
-			if (v.isAssigned())
-			{	
-				//check the neighbor of variable v and removes value from its from neighbor
-				for (Variable neighborVar: network.getNeighborsOfVariable(v))
-				{
-					//Check if variable v value is the same as its neighbor 
-					if (neighborVar.getAssignment() == v.getAssignment())
-						return false;
-					else if (!neighborVar.isAssigned())
-						trail.push(neighborVar);//Push variable to the stack
-					
-					//Eliminate variable from its neighbor
-					neighborVar.removeValueFromDomain(v.getAssignment());
-					//if neighbor variable has no value after remove, then it is not consistent
-					if (neighborVar.getDomain().size() == 0)
-						return false;
-				}
-			}
-		}
-		return true;
+		return false;
 	}
 
 	/**
@@ -103,7 +77,7 @@ public class BTSolver
 	 * (2) If a constraint has only one possible place for a value
 	 *     then put the value there.
 	 *
-	 * Note: remember to trail.push variables before you assign them
+	 * Note: remember to trail.push variables before you change their domain
 	 * Return: true is assignment is consistent, false otherwise
 	 */
 	private boolean norvigCheck ( )
@@ -144,31 +118,7 @@ public class BTSolver
 	 */
 	private Variable getMRV ( )
 	{
-		Variable unassignedVar = null;
-		int mrv = 0;
-		int neighborCount = 0;
-		//Go through each variable and find the min variable size
-		//Select the smallest domain size and return
-		for(Variable v : network.getVariables())
-		{	
-			if (!v.isAssigned())
-			{
-				//Go through the neighbors of the unassigned variable
-				for (Variable neighborVar : network.getNeighborsOfVariable(v))
-				{
-					if (neighborVar.isAssigned())
-						neighborCount++;
-				}
-				//Pick the unassigned variable with highest assigned neighbor
-				if (neighborCount > mrv)
-				{
-					unassignedVar = v;
-					mrv = neighborCount;
-				}
-				neighborCount = 0;
-			}
-		}
-		return unassignedVar;
+		return null;
 	}
 
 	/**
@@ -235,47 +185,7 @@ public class BTSolver
 	 */
 	public List<Integer> getValuesLCVOrder ( Variable v )
 	{
-		List<Integer> sortedLCV = new LinkedList<Integer>();
-		Map<Integer,Integer> domainMap = new HashMap<Integer,Integer>();
-		//Traverse every domain in variable
-		for (Integer val: v.getDomain())
-		{
-			int count = 0;
-			//Check its neighbor
-			for (Variable neighborVar: network.getNeighborsOfVariable(v))
-			{
-				if (!neighborVar.isAssigned())
-				{
-					for (Integer v2: neighborVar.getDomain())
-					{
-						if (v2 == val)
-							count++;
-					}
-					
-				}
-				else if (neighborVar.getValues().get(0) == val)
-					count++;
-			}
-			domainMap.put(val, count);
-		}
-		//Convert Map to List of Map
-		List<Map.Entry<Integer, Integer>> list =
-			new LinkedList<Map.Entry<Integer, Integer>>(domainMap.entrySet());
-		
-		//Sort list with Collections.sort(), provide a custom Comparator
-		//Try switch the i1 i2 position in ascending order
-		Collections.sort(list, new Comparator<Map.Entry<Integer, Integer>>() {
-		    public int compare(Map.Entry<Integer, Integer> i1,
-				       Map.Entry<Integer, Integer> i2) {
-			return (i1.getValue()).compareTo(i2.getValue());
-		    }
-		});
-
-		//Loop the sorted list and put it into a new insertion order Map LinkedHashMap
-		for (Map.Entry<Integer, Integer> entry : list) {
-		    sortedLCV.add(entry.getKey());
-		}
-		return sortedLCV;
+		return null;
 	}
 
 	/**
