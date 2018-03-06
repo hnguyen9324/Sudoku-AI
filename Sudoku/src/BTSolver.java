@@ -186,7 +186,35 @@ public class BTSolver
 	 */
 	private Variable getDegree ( )
 	{
-		return null;
+		Variable unassignedVar = null;
+		int mostUnsignNeigh = 0;
+		int neighborCount = 0;
+		//Go through each variable and find the min variable size
+		//Select the smallest domain size and return
+		for(Variable v : network.getVariables())
+		{	
+			//Check if variable is unassigned
+			if (!v.isAssigned())
+			{
+				//Go through the neighbors of the unassigned variable
+				for (Variable neighborVar : network.getNeighborsOfVariable(v))
+				{	
+					//count the unassigned neighbor
+					if (!neighborVar.isAssigned())
+						neighborCount++;
+				}
+				//Pick the unassigned variable with highest unassigned neighbor
+				if (neighborCount > mostUnsignNeigh)
+				{
+					unassignedVar = v;
+					mostUnsignNeigh = neighborCount;
+				}
+				System.out.println(v + " Count= " + neighborCount);
+				neighborCount = 0;
+			}
+		}
+		System.out.println(unassignedVar);
+		return unassignedVar;
 	}
 
 	/**
