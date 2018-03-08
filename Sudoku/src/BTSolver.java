@@ -187,7 +187,7 @@ public class BTSolver
 	private Variable getDegree ( )
 	{
 		Variable unassignedVar = null;
-		int mostUnsignNeigh = 0;
+		int degree = 0;
 		int neighborCount = 0;
 		//Go through each variable and find the min variable size
 		//Select the smallest domain size and return
@@ -203,17 +203,17 @@ public class BTSolver
 					if (!neighborVar.isAssigned())
 						neighborCount++;
 				}
-				//Pick the unassigned variable with highest unassigned neighbor
-				if (neighborCount > mostUnsignNeigh)
+				//Pick the unassigned variable with highest degree
+				if (neighborCount > degree)
 				{
 					unassignedVar = v;
-					mostUnsignNeigh = neighborCount;
+					degree = neighborCount;
 				}
-				System.out.println(v + " Count= " + neighborCount);
+				//System.out.println(v + " Count= " + neighborCount);
 				neighborCount = 0;
 			}
 		}
-		System.out.println(unassignedVar);
+		//System.out.println(unassignedVar);
 		return unassignedVar;
 	}
 
@@ -226,7 +226,33 @@ public class BTSolver
 	 */
 	private Variable MRVwithTieBreaker ( )
 	{
-		return null;
+		Variable unassignedVar = null;
+		Variable mrvVar = null;
+		Variable tieBreaker = getDegree();
+		int mrv = 0;
+		int neighborCount = 0;
+		//Go through each variable and find the min variable size
+		//Select the smallest domain size and return
+		for(Variable v : network.getVariables())
+		{	
+			if (!v.isAssigned())
+			{
+				//Go through the neighbors of the unassigned variable
+				for (Variable neighborVar : network.getNeighborsOfVariable(v))
+				{
+					if (neighborVar.isAssigned())
+						neighborCount++;
+				}
+				//Pick the unassigned variable with highest assigned neighbor
+				if (neighborCount > mrv)
+				{
+					mrvVar = v;
+					mrv = neighborCount;
+				}
+				neighborCount = 0;
+			}
+		}
+		return unassignedVar;
 	}
 
 	/**
