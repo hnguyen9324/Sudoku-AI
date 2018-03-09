@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.ArrayList;
 
 public class BTSolver
 {
@@ -117,37 +116,15 @@ public class BTSolver
 	 */
 	private boolean norvigCheck ( )
 	{
-		int assignment;
+		
 		for(Variable v : network.getVariables())
 		{
 			if(v.isAssigned())
 			{
-				assignment = v.getAssignment();
-				for(Variable neighbor : network.getNeighborsOfVariable(v))
-				{
-					for(Integer i : neighbor.getValues())
-					{
-						//System.out.println("Integer i = " + i);
-						if(i == assignment) 
-						{
-							System.out.println("Integer i = " + i + " and assignment = " + assignment);
-							trail.push(neighbor);
-							//neighbor.removeValueFromDomain(assignment);
-
-
-						}/*
-							trail.push(neighbor);
-							neighbor.removeValueFromDomain(assignment);
-							if (neighbor.getDomain().size() == 0)
-								return false;
-							if (neighbor.getDomain().size() == 1)
-								neighbor.assignValue(assignment);
-						}*/
-					}
-				}
+				v.getValues();
 			}
 		}
-		return true;
+		return false;
 	}
 
 	/**
@@ -184,30 +161,52 @@ public class BTSolver
 	private Variable getMRV ( )
 	{
 		Variable unassignedVar = null;
-		int mrv = 0;
+		int mrv = 9999;
 		int neighborCount = 0;
+
+		List<Integer> neighborDomain = new LinkedList<Integer>();
 		//Go through each variable and find the min variable size
-		//Select the smallest domain size and return
+		//Select the smallest domain size
 		for(Variable v : network.getVariables())
 		{	
 			if (!v.isAssigned())
 			{
 				//Go through the neighbors of the unassigned variable
 				for (Variable neighborVar : network.getNeighborsOfVariable(v))
-				{
+				{	
 					if (neighborVar.isAssigned())
-						neighborCount++;
+					{
+						if (neighborDomain.isEmpty())
+							neighborDomain.add(neighborVar.getAssignment());
+						else
+						{
+							//Prevent adding duplicate domain values 
+							boolean isDuplicate = false;
+							for (Integer value: neighborDomain)
+							{
+								if (value == neighborVar.getAssignment())
+								{
+									isDuplicate = true;
+									break;
+								}
+							}
+							if (!isDuplicate)
+								neighborDomain.add(neighborVar.getAssignment());
+						}
+					}
 				}
-				//Pick the unassigned variable with highest assigned neighbor
-				if (neighborCount > mrv)
+				neighborCount = v.getDomain().size() - neighborDomain.size();
+				//Pick the variable with the smallest domain
+				if (neighborCount < mrv)
 				{
 					unassignedVar = v;
 					mrv = neighborCount;
 				}
 				neighborCount = 0;
+				neighborDomain.clear();
 			}
 		}
-		System.out.println(network.getModifiedConstraints());
+		//System.out.println("Variable select: " + unassignedVar);
 		return unassignedVar;
 	}
 
@@ -219,29 +218,33 @@ public class BTSolver
 	private Variable getDegree ( )
 	{
 		Variable unassignedVar = null;
-		int unassignedCount = 0;
 		int degree = 0;
+		int neighborCount = 0;
+		//Go through each variable and find the min variable size
+		//Select the smallest domain size and return
 		for(Variable v : network.getVariables())
-		{
-
-			if(!v.isAssigned())
+		{	
+			//Check if variable is unassigned
+			if (!v.isAssigned())
 			{
-				for(Variable neighbor : network.getNeighborsOfVariable(v))
-				{
-					if(!neighbor.isAssigned())
-					{
-						unassignedCount++;
-					}
+				//Go through the neighbors of the unassigned variable
+				for (Variable neighborVar : network.getNeighborsOfVariable(v))
+				{	
+					//count the unassigned neighbor
+					if (!neighborVar.isAssigned())
+						neighborCount++;
 				}
-				if(unassignedCount > degree)
+				//Pick the unassigned variable with highest degree
+				if (neighborCount > degree)
 				{
-					degree = unassignedCount;
 					unassignedVar = v;
+					degree = neighborCount;
 				}
-				System.out.println("V: " + v.getName() + " unassignedCount: " + unassignedCount);
-				unassignedCount = 0;
+				System.out.println(v + " Count= " + neighborCount);
+				neighborCount = 0;
 			}
 		}
+		System.out.println("Variable select: " + unassignedVar);
 		return unassignedVar;
 	}
 
@@ -254,9 +257,87 @@ public class BTSolver
 	 */
 	private Variable MRVwithTieBreaker ( )
 	{
-		//Variable tieBreaker = getDegree();
-		//return tieBreaker;
-		return null;
+		Variable unassignedVar = null;
+		Variable mrvVar = null;
+		List<Variable> mrvList = new LinkedList<Variable>();
+		int mrv = 9999;
+		int neighborCount = 0;
+		int degree = 0;
+		
+		List<Integer> neighborDomain = new LinkedList<Integer>();
+		//Go through each variable and find the min variable size
+		//Select the smallest domain size
+		for(Variable v : network.getVariables())
+		{	
+			if (!v.isAssigned())
+			{
+				//Go through the neighbors of the unassigned variable
+				for (Variable neighborVar : network.getNeighborsOfVariable(v))
+				{	
+					if (neighborVar.isAssigned())
+					{
+						if (neighborDomain.isEmpty())
+							neighborDomain.add(neighborVar.getAssignment());
+						else
+						{
+							//Prevent adding duplicate domain values 
+							boolean isDuplicate = false;
+							for (Integer value: neighborDomain)
+							{
+								if (value == neighborVar.getAssignment())
+								{
+									isDuplicate = true;
+									break;
+								}
+							}
+							if (!isDuplicate)
+								neighborDomain.add(neighborVar.getAssignment());
+						}
+					}
+				}
+				neighborCount = v.getDomain().size() - neighborDomain.size();
+				//Pick the variable with the smallest domain
+				if (neighborCount < mrv)
+				{
+					if (!mrvList.isEmpty())
+						mrvList.clear();
+					mrvList.add(v);
+					mrv = neighborCount;
+				}
+				//if the variable domain size are equal to mrv then add to mrv variable list
+				else if (neighborCount == mrv)
+					mrvList.add(v);
+				//Reset variables
+				neighborCount = 0;
+				neighborDomain.clear();
+			}
+		}
+		
+		if (mrvList.size() > 1)
+		{
+			//Get unassigned variable with the most unassigned neighbors by using degree check as a tie breaker
+			for (Variable v: mrvList)
+			{
+				//System.out.println("MRV: " + v);
+				//Count the neighbor of the variable selected by MRV
+				for (Variable neighborVar: network.getNeighborsOfVariable(v))
+				{
+					if (!neighborVar.isAssigned())
+						neighborCount++;	
+				}
+				//Select the variable that has the highest degree count
+				if (neighborCount > degree)
+				{
+					unassignedVar = v;
+					degree = neighborCount;
+				}
+				neighborCount = 0;
+			}
+		}
+		else if (mrvList.size() == 1)
+			unassignedVar = mrvList.get(0);
+		System.out.println("Variable select: " + unassignedVar);
+		return unassignedVar;
 	}
 
 	/**
@@ -301,30 +382,45 @@ public class BTSolver
 	 */
 	public List<Integer> getValuesLCVOrder ( Variable v )
 	{
-		// THIS IS A TEST 
-		List<Integer> sortedLCV = new ArrayList<Integer>(); // the LCV's in increasing size
-		List<Integer> domainList = new ArrayList<Integer>(); // Elements of the domain
-		List<Integer> countList = new ArrayList<Integer>(); //	Size of the count after comparison
-		for(Integer vElement : v.getDomain())
+		List<Integer> sortedLCV = new LinkedList<Integer>();
+		Map<Integer,Integer> domainMap = new HashMap<Integer,Integer>();
+		//Traverse every domain in variable
+		for (Integer val: v.getDomain())
 		{
-			domainList.add(vElement);
 			int count = 0;
-			for(Variable neighbor : network.getNeighborsOfVariable(v))
+			//Check its neighbor
+			for (Variable neighborVar: network.getNeighborsOfVariable(v))
 			{
-				for(Integer neighborElement : neighbor.getDomain())
+				if (!neighborVar.isAssigned())
 				{
-					if(vElement == neighborElement)
-						count++;
+					for (Integer v2: neighborVar.getDomain())
+					{
+						if (v2 == val)
+							count++;
+					}
+					
 				}
+				else if (neighborVar.getValues().get(0) == val)
+					count++;
 			}
-			countList.add(count);
+			domainMap.put(val, count);
 		}
-		int minIndex = 0;
-		for(Integer countListItem : countList)
-		{
-			minIndex = countList.indexOf(Collections.min(countList)); 
-			sortedLCV.add( domainList.get( minIndex ) );
-			countList.set(minIndex, Integer.MAX_VALUE); 
+		//Convert Map to List of Map
+		List<Map.Entry<Integer, Integer>> list =
+			new LinkedList<Map.Entry<Integer, Integer>>(domainMap.entrySet());
+		
+		//Sort list with Collections.sort(), provide a custom Comparator
+		//Try switch the i1 i2 position in ascending order
+		Collections.sort(list, new Comparator<Map.Entry<Integer, Integer>>() {
+		    public int compare(Map.Entry<Integer, Integer> i1,
+				       Map.Entry<Integer, Integer> i2) {
+			return (i1.getValue()).compareTo(i2.getValue());
+		    }
+		});
+
+		//Loop the sorted list and put it into a new insertion order Map LinkedHashMap
+		for (Map.Entry<Integer, Integer> entry : list) {
+		    sortedLCV.add(entry.getKey());
 		}
 		return sortedLCV;
 	}
