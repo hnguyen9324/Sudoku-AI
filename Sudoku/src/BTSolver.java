@@ -116,15 +116,43 @@ public class BTSolver
 	 */
 	private boolean norvigCheck ( )
 	{
+		int neighborAssignment, vAssignment;
 		
-		for(Variable v : network.getVariables())
+		for (Variable v: network.getVariables())
 		{
-			if(v.isAssigned())
-			{
-				v.getValues();
+			System.out.println("V: " + v + "CONSTRAINT " + network.getConstraintsContainingVariable(v));
+			
+			if (v.isAssigned())
+			{	
+				for (Variable neighbor: network.getNeighborsOfVariable(v))
+				{
+					neighborAssignment = neighbor.getAssignment();
+					vAssignment = v.getAssignment();
+					
+					if (neighborAssignment == vAssignment)
+					{
+						return false;
+					}
+						
+					else if (!neighbor.isAssigned())
+					{	
+						for (Integer domainValue: neighbor.getValues())
+						{	
+							if (vAssignment == domainValue)
+							{
+								trail.push(neighbor);
+								break;
+							}
+						}
+					}
+					neighbor.removeValueFromDomain(vAssignment);
+					
+					if (neighbor.getDomain().size() == 0)
+						return false;
+				}
 			}
 		}
-		return false;
+		return true;
 	}
 
 	/**
