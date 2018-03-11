@@ -177,12 +177,15 @@ public class BTSolver
 					// otherwise the set contains only one item and we assign v the value contained in the set.
 					else
 					{
+						int val = set.iterator().next(); // the single value contained in the set
 						trail.push(v);
-						v.assignValue(set.iterator().next());
-						if(v.getValues().size() == 0)
+						v.removeValueFromDomain(val);
+						if(v.size() == 0)
 						{
 							return false;
 						}
+						v.assignValue(val);
+
 					}
 				}
 			}
