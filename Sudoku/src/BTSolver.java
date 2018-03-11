@@ -136,7 +136,7 @@ public class BTSolver
 						if(!neighbor.isAssigned())
 						{
 							int uniqueValue =-1;
-							int numberOfMiss = 0;
+							int numberOfMiss = 0; // number of times elements do not match
 							
 							// Either v and n have same domains or domain of v has 2 more elements than n
 							if (v.getValues().equals(neighbor.getValues()) || v.getValues().size() - neighbor.getValues().size() >= 2)
@@ -193,7 +193,6 @@ public class BTSolver
 						System.out.println(v.getName() + " " + set);
 						trail.push(v);
 						v.assignValue(set.iterator().next());
-						v.removeValueFromDomain(set.iterator().next());
 					}
 					if(v.getValues().size() == 0)
 						return false;
@@ -320,7 +319,7 @@ public class BTSolver
 				neighborCount = 0;
 			}
 		}
-		System.out.println("Variable select: " + unassignedVar);
+		//System.out.println("Variable select: " + unassignedVar);
 		return unassignedVar;
 	}
 
