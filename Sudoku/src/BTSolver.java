@@ -141,7 +141,7 @@ public class BTSolver
 							// Either v and n have same domains or domain of v has 2 more elements than n
 							if (v.getValues().equals(neighbor.getValues()) || v.getValues().size() - neighbor.getValues().size() >= 2)
 							{
-								break;
+								continue;
 							}
 							
 							// Domain size of v is smaller or equal to n
