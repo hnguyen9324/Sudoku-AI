@@ -119,73 +119,49 @@ public class BTSolver
 	 */
 	private boolean norvigCheck ( )
 	{
+		List<Integer> uniqueValues = new LinkedList<Integer>();
 		//Attempting NORVIG
 		if (forwardChecking() == false)
 			return false;
 		else
 		{
 			for (Variable v: network.getVariables())
-			{
+			{	
 				//Check if this variable if unassigned and if it is, then is it the only one left in the row/column/block
 				if (!v.isAssigned())
 				{
-					int rowCount = 0;
-					int colCount = 0;
-					int blockCount = 0;
-					List<Constraint> constraintVar = network.getConstraintsContainingVariable(v);
-					Constraint row = constraintVar.get(0);
-					Constraint col = constraintVar.get(1);
-					Constraint block = constraintVar.get(2);
-					for (Variable var: network.getVariables())
+					//Get all the domains currently available of the unassigned variable
+					if (uniqueValues.isEmpty())
 					{
-						if (!var.getName().equals(v.getName()))
+						for (Integer varDomain: v.getDomain())
+							uniqueValues.add(varDomain);
+					}
+					//Eliminate the values from its neighbor, if only one values are 
+					//left then that is the only possible value to assign
+					for (Variable neighbor: network.getNeighborsOfVariable(v))
+					{
+						if (!neighbor.isAssigned())
 						{
-							if (row.contains(var) && rowCount == 0)
+							//Eliminates domains if it matches neighbor domains
+							for (Integer neighDomain: neighbor.getDomain())
 							{
-								if (!var.isAssigned())
-									rowCount++;
+								if (uniqueValues.contains(neighDomain))
+									uniqueValues.remove(neighDomain);
 							}
-							if (col.contains(var) && colCount == 0)
-							{
-								if (!var.isAssigned())
-									colCount++;
-							}
-							if (block.contains(var) && blockCount == 0)
-							{
-								if (!var.isAssigned())
-									blockCount++;
-							}
+							
+							if (uniqueValues.isEmpty())
+								break;
 						}
 					}
-					//Assign a value to the variable if a row/col/block has only one place left
-					boolean consistent = false;
-					if (rowCount == 0 || colCount == 0 || blockCount == 0)
-					{	
-						//find a value that is consistent to assign to variable
-						for (Integer value: v.getDomain())
-						{	
-							for (Variable neighbor: network.getNeighborsOfVariable(v))
-							{
-								if (neighbor.getAssignment() == v.getAssignment())
-								{
-									consistent = false;
-									break;
-								}
-								else
-									consistent = true;
-							}
-							if (consistent)
-							{
-								System.out.println("Assign a value " + value + " at " + v);
-								v.assignValue(value);
-								return true;
-							}	
-						}
-						//If no values from the domain can be assign return false
-						if (!consistent)
-							return false;
+					if (uniqueValues.size() == 1)
+					{
+						trail.push(v);
+						System.out.println("Assign value "+ uniqueValues.get(0) + " at " + v);
+						v.assignValue(uniqueValues.get(0));
 					}
+					uniqueValues.clear();
 				}
+				
 			}
 		}
 		return true;
