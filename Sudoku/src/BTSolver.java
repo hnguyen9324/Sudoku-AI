@@ -118,6 +118,8 @@ public class BTSolver
 	 */
 	private boolean norvigCheck ( )
 	{
+		Set<Integer> set = new HashSet<Integer>();
+
 		// Part 1
 		if(forwardChecking() == false)
 			return false;
@@ -127,7 +129,6 @@ public class BTSolver
 			// Go through each variable
 			for(Variable v : network.getVariables())
 			{
-				Set<Integer> set = new HashSet<Integer>();
 				
 				// Find the unassigned variables
 				if(!v.isAssigned())
@@ -171,6 +172,7 @@ public class BTSolver
 					// if nothing was added to the set or if the set contains more than one element than for this v, we did not find a unique value to assign.
 					if(set.size() == 0 || set.size() > 1)
 					{
+						set.clear();
 						continue;
 					}
 					
@@ -306,7 +308,7 @@ public class BTSolver
 					unassignedVar = v;
 					degree = neighborCount;
 				}
-				System.out.println(v + " Count= " + neighborCount);
+				//System.out.println(v + " Count= " + neighborCount);
 				neighborCount = 0;
 			}
 		}
@@ -402,7 +404,7 @@ public class BTSolver
 		}
 		else if (mrvList.size() == 1)
 			unassignedVar = mrvList.get(0);
-		System.out.println("Variable select: " + unassignedVar);
+		//System.out.println("Variable select: " + unassignedVar);
 		return unassignedVar;
 	}
 
