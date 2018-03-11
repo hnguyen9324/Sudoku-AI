@@ -124,28 +124,72 @@ public class BTSolver
 		// Part 2
 		else
 		{
+			// Go through each variable
 			for(Variable v : network.getVariables())
 			{
 				Set<Integer> set = new HashSet<Integer>();
-
+				
+				// Find the unassigned variables
 				if(!v.isAssigned())
 				{
 					
+					// Go through the neighborhood of unassigned variable
 					for(Variable neighbor : network.getNeighborsOfVariable(v))
 					{
+						// Find the unassigned neighbors
 						if(!neighbor.isAssigned())
 						{
-							int uniqueValue =-1;
-							int numberOfMiss = 0; // number of times elements do not match
 							
-							// Either v and n have same domains or domain of v has 2 more elements than n
-							if (v.getValues().equals(neighbor.getValues()) || v.getValues().size() - neighbor.getValues().size() >= 2)
+							// if v and n have same domains there is no unique value in v's domain
+							if (v.getValues().equals(neighbor.getValues()))
 							{
 								continue;
 							}
 							
+							// Look for the unique value in v's domain
+							else
+							{
+								// for each element in v's domain
+								for(Integer vElement : v.getValues())
+								{
+									// If there is a match between element in v and element in n go to next element in v's domain
+									if(neighbor.getValues().contains(vElement))
+									{
+										continue;
+									}
+									
+									// Otherwise there is an element in v's domain not present in this particular neighbor so, add it to the set
+									else
+									{
+										set.add(vElement);
+									}
+								}
+							}
+						}
+					}
+					
+					// if nothing was added to the set or if the set contains more than one element than for this v, we did not find a unique value to assign.
+					if(set.size() == 0 || set.size() > 1)
+					{
+						continue;
+					}
+					
+					// otherwise the set contains only one item and we assign v the value contained in the set.
+					else
+					{
+						trail.push(v);
+						v.assignValue(set.iterator().next());
+						if(v.getValues().size() == 0)
+						{
+							return false;
+						}
+					}
+				}
+			}
+		}
+							
 							// Domain size of v is smaller or equal to n
-							else if(v.getValues().size() <= neighbor.getValues().size())
+						/*	else if(v.getValues().size() <= neighbor.getValues().size())
 							{
 								for(int i = 0; i < v.size(); i++)
 								{
@@ -186,7 +230,8 @@ public class BTSolver
 								if(uniqueValue >= 0)
 									set.add(uniqueValue);
 							}
-						}
+						} 
+					
 					}
 					if(set.size() == 1)
 					{
@@ -198,7 +243,7 @@ public class BTSolver
 						return false;
 				}
 			}
-		}	
+		}	*/
 		return true;
 	}
 
