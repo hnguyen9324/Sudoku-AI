@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 
 public class BTSolver
 {
@@ -116,43 +118,26 @@ public class BTSolver
 	 */
 	private boolean norvigCheck ( )
 	{
-		int neighborAssignment, vAssignment;
-		
-		for (Variable v: network.getVariables())
+		if(forwardChecking() == false)
+			return false;
+		else
 		{
-			System.out.println("V: " + v + "CONSTRAINT " + network.getConstraintsContainingVariable(v));
-			
-			if (v.isAssigned())
-			{	
-				for (Variable neighbor: network.getNeighborsOfVariable(v))
+			for (Variable v : network.getVariables())
+			{
+				
+				//System.out.println("V: " + v + "CONSTRAINT " + network.getConstraintsContainingVariable(v));
+				if(!v.isAssigned())
 				{
-					neighborAssignment = neighbor.getAssignment();
-					vAssignment = v.getAssignment();
-					
-					if (neighborAssignment == vAssignment)
+					System.out.println("Norvig " + v.getName());
+
+					for (Variable neighbor : network.getNeighborsOfVariable(v))
 					{
-						return false;
+						System.out.println("Norvig " + neighbor.getName());
 					}
-						
-					else if (!neighbor.isAssigned())
-					{	
-						for (Integer domainValue: neighbor.getValues())
-						{	
-							if (vAssignment == domainValue)
-							{
-								trail.push(neighbor);
-								break;
-							}
-						}
-					}
-					neighbor.removeValueFromDomain(vAssignment);
-					
-					if (neighbor.getDomain().size() == 0)
-						return false;
 				}
 			}
-		}
-		return true;
+			return true;
+		}		
 	}
 
 	/**
