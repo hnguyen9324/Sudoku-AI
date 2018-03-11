@@ -120,48 +120,44 @@ public class BTSolver
 	private boolean norvigCheck ( )
 	{
 		List<Integer> uniqueValues = new LinkedList<Integer>();
-		//Attempting NORVIG
 		if (forwardChecking() == false)
 			return false;
-		else
-		{
-			for (Variable v: network.getVariables())
-			{	
-				//Check if this variable if unassigned and if it is, then is it the only one left in the row/column/block
-				if (!v.isAssigned())
+		for (Variable v: network.getVariables())
+		{	
+			if (!v.isAssigned())
+			{
+				//Get all the domains currently available of the unassigned variable
+				if (uniqueValues.isEmpty())
 				{
-					//Get all the domains currently available of the unassigned variable
-					if (uniqueValues.isEmpty())
-					{
-						for (Integer varDomain: v.getDomain())
-							uniqueValues.add(varDomain);
-					}
-					//Eliminate the values from its neighbor, if only one values are 
-					//left then that is the only possible value to assign
-					for (Variable neighbor: network.getNeighborsOfVariable(v))
-					{
-						if (!neighbor.isAssigned())
-						{
-							//Eliminates domains if it matches neighbor domains
-							for (Integer neighDomain: neighbor.getDomain())
-							{
-								if (uniqueValues.contains(neighDomain))
-									uniqueValues.remove(neighDomain);
-							}
-							
-							if (uniqueValues.isEmpty())
-								break;
-						}
-					}
-					if (uniqueValues.size() == 1)
-					{
-						trail.push(v);
-						System.out.println("Assign value "+ uniqueValues.get(0) + " at " + v);
-						v.assignValue(uniqueValues.get(0));
-					}
-					uniqueValues.clear();
+					for (Integer varDomain: v.getDomain())
+						uniqueValues.add(varDomain);
 				}
-				
+				//Eliminate the values from its neighbor, if only one values are 
+				//left then that is the only possible value to assign
+				for (Variable neighbor: network.getNeighborsOfVariable(v))
+				{
+					if (!neighbor.isAssigned())
+					{
+						//Eliminates domains if it matches neighbor domains
+						for (Integer neighDomain: neighbor.getDomain())
+						{
+							if (uniqueValues.contains(neighDomain))
+								uniqueValues.remove(neighDomain);
+						}
+						
+						if (uniqueValues.isEmpty())
+							break;
+					}
+				}
+				if (uniqueValues.size() == 1)
+				{
+					//trail.push(v);
+					//System.out.println("Assign value "+ uniqueValues.get(0) + " at " + v);
+					v.assignValue(uniqueValues.get(0));
+					if (forwardChecking() == false)
+						return false;
+				}
+				uniqueValues.clear();
 			}
 		}
 		return true;
