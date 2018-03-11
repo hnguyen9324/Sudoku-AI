@@ -187,63 +187,6 @@ public class BTSolver
 				}
 			}
 		}
-							
-							// Domain size of v is smaller or equal to n
-						/*	else if(v.getValues().size() <= neighbor.getValues().size())
-							{
-								for(int i = 0; i < v.size(); i++)
-								{
-									if(v.getValues().get(i) == neighbor.getValues().get(i))
-										continue;
-									else
-									{
-										numberOfMiss++;
-										if(numberOfMiss <= 1)
-											uniqueValue = v.getValues().get(i);
-									}
-								}
-								if(uniqueValue >= 0)
-									set.add(uniqueValue);
-							}
-							
-							// Domain size of v is 1 element larger than n
-							else
-							{
-								int index = 0;
-								for(int i = 0; i < neighbor.size(); i++)
-								{
-									if(v.getValues().get(i) == neighbor.getValues().get(i))
-									{
-										index++;
-										continue;
-									}
-									else
-									{
-										index++;
-										numberOfMiss++;
-										if(numberOfMiss <= 1)
-											uniqueValue = v.getValues().get(i);
-									}
-								}
-								if(numberOfMiss <= 1)
-									uniqueValue = v.getValues().get(index);
-								if(uniqueValue >= 0)
-									set.add(uniqueValue);
-							}
-						} 
-					
-					}
-					if(set.size() == 1)
-					{
-						System.out.println(v.getName() + " " + set);
-						trail.push(v);
-						v.assignValue(set.iterator().next());
-					}
-					if(v.getValues().size() == 0)
-						return false;
-				}
-			}
-		}	*/
 		return true;
 	}
 
