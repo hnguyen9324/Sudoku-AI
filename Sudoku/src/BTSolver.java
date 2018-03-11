@@ -118,26 +118,89 @@ public class BTSolver
 	 */
 	private boolean norvigCheck ( )
 	{
+		// Part 1
 		if(forwardChecking() == false)
 			return false;
+		// Part 2
 		else
 		{
-			for (Variable v : network.getVariables())
+			for(Variable v : network.getVariables())
 			{
-				
-				//System.out.println("V: " + v + "CONSTRAINT " + network.getConstraintsContainingVariable(v));
+				Set<Integer> set = new HashSet<Integer>();
+
 				if(!v.isAssigned())
 				{
-					System.out.println("Norvig " + v.getName());
-
-					for (Variable neighbor : network.getNeighborsOfVariable(v))
+					
+					for(Variable neighbor : network.getNeighborsOfVariable(v))
 					{
-						System.out.println("Norvig " + neighbor.getName());
+						if(!neighbor.isAssigned())
+						{
+							int uniqueValue =-1;
+							int numberOfMiss = 0;
+							
+							// Either v and n have same domains or domain of v has 2 more elements than n
+							if (v.getValues().equals(neighbor.getValues()) || v.getValues().size() - neighbor.getValues().size() >= 2)
+							{
+								break;
+							}
+							
+							// Domain size of v is smaller or equal to n
+							else if(v.getValues().size() <= neighbor.getValues().size())
+							{
+								for(int i = 0; i < v.size(); i++)
+								{
+									if(v.getValues().get(i) == neighbor.getValues().get(i))
+										continue;
+									else
+									{
+										numberOfMiss++;
+										if(numberOfMiss <= 1)
+											uniqueValue = v.getValues().get(i);
+									}
+								}
+								if(uniqueValue >= 0)
+									set.add(uniqueValue);
+							}
+							
+							// Domain size of v is 1 element larger than n
+							else
+							{
+								int index = 0;
+								for(int i = 0; i < neighbor.size(); i++)
+								{
+									if(v.getValues().get(i) == neighbor.getValues().get(i))
+									{
+										index++;
+										continue;
+									}
+									else
+									{
+										index++;
+										numberOfMiss++;
+										if(numberOfMiss <= 1)
+											uniqueValue = v.getValues().get(i);
+									}
+								}
+								if(numberOfMiss <= 1)
+									uniqueValue = v.getValues().get(index);
+								if(uniqueValue >= 0)
+									set.add(uniqueValue);
+							}
+						}
 					}
+					if(set.size() == 1)
+					{
+						System.out.println(v.getName() + " " + set);
+						trail.push(v);
+						v.assignValue(set.iterator().next());
+						v.removeValueFromDomain(set.iterator().next());
+					}
+					if(v.getValues().size() == 0)
+						return false;
 				}
 			}
-			return true;
-		}		
+		}	
+		return true;
 	}
 
 	/**
