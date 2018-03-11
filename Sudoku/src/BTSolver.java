@@ -88,6 +88,8 @@ public class BTSolver
 							}
 						}
 					}
+					else
+						continue;
 					//Eliminate variable from its neighbor
 					neighborVar.removeValueFromDomain(v.getAssignment());
 					//if neighbor variable has no value after remove, then it is not consistent
@@ -117,7 +119,76 @@ public class BTSolver
 	 */
 	private boolean norvigCheck ( )
 	{
-		return false;
+		//Attempting NORVIG
+		if (forwardChecking() == false)
+			return false;
+		else
+		{
+			for (Variable v: network.getVariables())
+			{
+				//Check if this variable if unassigned and if it is, then is it the only one left in the row/column/block
+				if (!v.isAssigned())
+				{
+					int rowCount = 0;
+					int colCount = 0;
+					int blockCount = 0;
+					List<Constraint> constraintVar = network.getConstraintsContainingVariable(v);
+					Constraint row = constraintVar.get(0);
+					Constraint col = constraintVar.get(1);
+					Constraint block = constraintVar.get(2);
+					for (Variable var: network.getVariables())
+					{
+						if (!var.getName().equals(v.getName()))
+						{
+							if (row.contains(var) && rowCount == 0)
+							{
+								if (!var.isAssigned())
+									rowCount++;
+							}
+							if (col.contains(var) && colCount == 0)
+							{
+								if (!var.isAssigned())
+									colCount++;
+							}
+							if (block.contains(var) && blockCount == 0)
+							{
+								if (!var.isAssigned())
+									blockCount++;
+							}
+						}
+					}
+					//Assign a value to the variable if a row/col/block has only one place left
+					boolean consistent = false;
+					if (rowCount == 0 || colCount == 0 || blockCount == 0)
+					{	
+						//find a value that is consistent to assign to variable
+						for (Integer value: v.getDomain())
+						{	
+							for (Variable neighbor: network.getNeighborsOfVariable(v))
+							{
+								if (neighbor.getAssignment() == v.getAssignment())
+								{
+									consistent = false;
+									break;
+								}
+								else
+									consistent = true;
+							}
+							if (consistent)
+							{
+								System.out.println("Assign a value " + value + " at " + v);
+								v.assignValue(value);
+								return true;
+							}	
+						}
+						//If no values from the domain can be assign return false
+						if (!consistent)
+							return false;
+					}
+				}
+			}
+		}
+		return true;
 	}
 
 	/**
@@ -156,15 +227,14 @@ public class BTSolver
 		Variable unassignedVar = null;
 		int mrv = 9999;
 		int unassignVarSize = 0;
-
 		List<Integer> neighborDomain = new LinkedList<Integer>();
-		//Go through each variable and find the min variable size
-		//Select the smallest domain size
+		
+		//Go through each variable and select the smallest domain size
 		for(Variable v : network.getVariables())
 		{	
 			if (!v.isAssigned())
-			{
-				//Go through the neighbors of the unassigned variable
+			{	
+				//Check the neighbors of the unassigned variable
 				for (Variable neighborVar : network.getNeighborsOfVariable(v))
 				{	
 					//Get the domains of all its neighbor
@@ -190,6 +260,7 @@ public class BTSolver
 					}
 
 				}
+	
 				//Select the variable with the smallest domain size
 				int varSize = v.getDomain().size();
 				if (!v.isModified())
@@ -233,7 +304,8 @@ public class BTSolver
 		int unassignNeighborCount = 0;
 		int assignNeighborCount = 0;
 		boolean haveSelected = false;
-		//Testing 
+		//Testing: assign a value to the variable that is involved in the largest
+		//number of constraints on other unassigned variables
 		List<Integer> trackUnassignVar = new LinkedList<Integer>();
 		
 		//Go through each variable and find the min variable size
@@ -246,6 +318,7 @@ public class BTSolver
 				//Go through the neighbors of the unassigned variable
 				for (Variable neighborVar : network.getNeighborsOfVariable(v))
 				{	
+					/*TEST
 					if (neighborVar.isAssigned())
 					{	
 						assignNeighborCount++;
@@ -268,35 +341,24 @@ public class BTSolver
 								trackUnassignVar.add(value);
 						}
 					}
-					else if (!neighborVar.isAssigned())
-						unassignNeighborCount++;
+					else*/ 
+					if (neighborVar.isAssigned())
+						assignNeighborCount++;
 						
 				}
-				int total = 0;
-				if (unassignNeighborCount > assignNeighborCount)
-				{
-					total = unassignNeighborCount - assignNeighborCount;
-				}
-				else if (unassignNeighborCount < assignNeighborCount)
-				{
-					total = assignNeighborCount - unassignNeighborCount;
-				}
-				else if (assignNeighborCount == unassignNeighborCount)
-				{
-					total = unassignNeighborCount;
-				}
+
 				//Select the variable with highest degree
 				//System.out.println(v + " count : " + total);
-				if (total > degree)
+				if (assignNeighborCount > degree)
 				{
 					unassignedVar = v;
-					degree = total;
+					degree = assignNeighborCount;
 					haveSelected = true;
 				}
-				else if (unassignNeighborCount == degree && !haveSelected)
+				else if (assignNeighborCount == 0 && !haveSelected)
 				{
 					unassignedVar = v;
-					degree = total;
+					degree = assignNeighborCount;
 					haveSelected = true;
 				}
 				
@@ -305,7 +367,7 @@ public class BTSolver
 				trackUnassignVar.clear();
 			}
 		}
-		System.out.println("Variable select: " + unassignedVar);
+		//System.out.println("Variable select: " + unassignedVar);
 		return unassignedVar;
 	}
 
@@ -325,13 +387,13 @@ public class BTSolver
 		int degree = 0;
 		int unassignVarSize = 0;
 		List<Integer> neighborDomain = new LinkedList<Integer>();
-		//Go through each variable and find the min variable size
-		//Select the smallest domain size
+		
+		//Go through each variable and select the smallest domain size
 		for(Variable v : network.getVariables())
 		{	
 			if (!v.isAssigned())
 			{
-				//Go through the neighbors of the unassigned variable
+				//Find the neighbors of the unassigned variable
 				for (Variable neighborVar : network.getNeighborsOfVariable(v))
 				{	
 					if (neighborVar.isAssigned())
@@ -392,6 +454,7 @@ public class BTSolver
 			}
 		}
 		
+		boolean haveSelected = false;
 		//Do degree heuristic algorithm
 		if (mrvList.size() > 1)
 		{
@@ -409,6 +472,12 @@ public class BTSolver
 				{
 					unassignedVar = v;
 					degree = neighborCount;
+				}
+				else if (neighborCount == 0 && !haveSelected)
+				{
+					unassignedVar = v;
+					degree = neighborCount;
+					haveSelected = true;
 				}
 				neighborCount = 0;
 			}
