@@ -312,12 +312,10 @@ public class BTSolver
 	private Variable MRVwithTieBreaker ( )
 	{
 		Variable unassignedVar = null;
-		Variable mrvVar = null;
 		List<Variable> mrvList = new LinkedList<Variable>();
 		int mrv = 9999;
 		int neighborCount = 0;
 		int degree = 0;
-		int unassignVarSize = 0;
 		List<Integer> neighborDomain = new LinkedList<Integer>();
 		//Go through each variable and find the min variable size
 		//Select the smallest domain size
@@ -365,7 +363,6 @@ public class BTSolver
 					mrvList.add(v);
 				//Reset variables
 				neighborCount = 0;
-				
 				neighborDomain.clear();
 			}
 		}
