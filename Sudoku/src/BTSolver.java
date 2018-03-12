@@ -1,9 +1,11 @@
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class BTSolver
 {
@@ -118,7 +120,8 @@ public class BTSolver
 	 * Return: true is assignment is consistent, false otherwise
 	 */
 	private boolean norvigCheck ( )
-	{
+	{	
+		/* Kevin version
 		List<Integer> uniqueValues = new LinkedList<Integer>();
 		if (forwardChecking() == false)
 			return false;
@@ -158,6 +161,66 @@ public class BTSolver
 						return false;
 				}
 				uniqueValues.clear();
+			}
+		}*/
+		//Clint version
+		Set<Integer> set = new HashSet<Integer>();
+
+		// Part 1
+		if(forwardChecking() == false)
+			return false;
+		// Part 2
+		else
+		{
+			// Go through each variable
+			for(Variable v : network.getVariables())
+			{
+				
+				// Find the unassigned variables
+				if(!v.isAssigned())
+				{
+					
+					// Go through the neighborhood of unassigned variable
+					for(Variable neighbor : network.getNeighborsOfVariable(v))
+					{
+						// Find the unassigned neighbors
+						if(!neighbor.isAssigned())
+						{
+							// Go through the domains of all unassigned neighbors and add each domain value into the set (duplicates will not be insrted)
+							for(Integer i : neighbor.getValues())
+							{
+								set.add(i);
+							}
+						}
+					}
+				}
+				int count = 0;
+				int uniqueValue = 0;
+				
+				// For each value in the domain of v check it against the master set of neighbor domain values
+				for(Integer i : v.getValues())
+				{
+					if(set.contains(i))
+					{
+						continue;
+					}
+					else
+					{
+						count++;
+						uniqueValue = i;
+					}
+				}
+				
+				// if only one value from v's domain is found to not match any value from the master set, assign v and forward check for consistency
+				if(count == 1)
+				{
+					v.assignValue(uniqueValue);
+					if(forwardChecking() == false)
+						return false;
+				}
+				count = 0;
+				uniqueValue = 0;
+				set.clear();
 			}
 		}
 		return true;
@@ -199,6 +262,7 @@ public class BTSolver
 		Variable unassignedVar = null;
 		int mrv = 9999;
 		int unassignVarSize = 0;
+		int neighborCount = 0;
 		List<Integer> neighborDomain = new LinkedList<Integer>();
 		
 		//Go through each variable and select the smallest domain size
@@ -232,7 +296,7 @@ public class BTSolver
 					}
 
 				}
-	
+				/*version 2
 				//Select the variable with the smallest domain size
 				int varSize = v.getDomain().size();
 				if (!v.isModified())
@@ -255,10 +319,20 @@ public class BTSolver
 						mrv = varSize;
 					}
 				}
+				*/
+				//version 1
+				neighborCount = v.getDomain().size() - neighborDomain.size();
+				//Pick the variable with the smallest domain
+				if (neighborCount < mrv)
+				{
+					unassignedVar = v;
+					mrv = neighborCount;
+				}
+				neighborCount = 0;
 				neighborDomain.clear();
 			}
 		}
-		System.out.println("Variable select: " + unassignedVar);
+		//System.out.println("Variable select: " + unassignedVar);
 		return unassignedVar;
 	}
 
@@ -271,47 +345,29 @@ public class BTSolver
 	{
 		Variable unassignedVar = null;
 		int degree = 0;
-		int unassignCount = 0;
-		int unassignVarSize = 0;
-		int unassignNeighborCount = 0;
-		int assignNeighborCount = 0;
-		boolean haveSelected = false;
-		//Testing: assign a value to the variable that is involved in the largest
-		//number of constraints on other unassigned variables
-		List<Integer> trackUnassignVar = new LinkedList<Integer>();
-		
+		int neighborCount = 0;
 		//Go through each variable and find the min variable size
 		//Select the smallest domain size and return
 		for(Variable v : network.getVariables())
 		{	
 			//Check if variable is unassigned
 			if (!v.isAssigned())
-			{	
+			{
 				//Go through the neighbors of the unassigned variable
 				for (Variable neighborVar : network.getNeighborsOfVariable(v))
-				{
-					if (neighborVar.isAssigned())
-						assignNeighborCount++;
+				{	
+					//count the unassigned neighbor
+					if (!neighborVar.isAssigned())
+						neighborCount++;
 				}
-
-				//Select the variable with highest degree
-				//System.out.println(v + " count : " + total);
-				if (assignNeighborCount > degree)
-				{
-					unassignedVar = v;
-					degree = assignNeighborCount;
-					haveSelected = true;
-				}
-				else if (assignNeighborCount == 0 && !haveSelected)
+				//Pick the unassigned variable with highest degree
+				if (neighborCount > degree)
 				{
 					unassignedVar = v;
-					degree = assignNeighborCount;
-					haveSelected = true;
+					degree = neighborCount;
 				}
-				
-				unassignNeighborCount = 0;
-				assignNeighborCount = 0;
-				trackUnassignVar.clear();
+				//System.out.println(v + " Count= " + neighborCount);
+				neighborCount = 0;
 			}
 		}
 		//System.out.println("Variable select: " + unassignedVar);
@@ -364,7 +420,7 @@ public class BTSolver
 						}
 					}
 				}
-				
+				/* version 2
 				//Select the variable with the smallest domain size
 				int varSize = v.getDomain().size();
 				if (!v.isModified())
@@ -396,8 +452,9 @@ public class BTSolver
 					}
 					else if (varSize == mrv)
 						mrvList.add(v);
-				}
-				/* previous version 
+				}*/
+				
+				//version 1
 				neighborCount = v.getDomain().size() - neighborDomain.size();
 				//Pick the variable with the smallest domain
 				if (neighborCount < mrv)
@@ -412,7 +469,6 @@ public class BTSolver
 					mrvList.add(v);
 				//Reset variables
 				neighborCount = 0;
-				*/
 				neighborDomain.clear();
 			}
 		}
@@ -447,7 +503,7 @@ public class BTSolver
 		}
 		else if (mrvList.size() == 1)
 			unassignedVar = mrvList.get(0);
-		System.out.println("Variable select: " + unassignedVar);
+		//System.out.println("Variable select: " + unassignedVar);
 		return unassignedVar;
 	}
 
