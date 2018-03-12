@@ -277,6 +277,7 @@ public class BTSolver
 		//Select the smallest domain size and return
 		for(Variable v : network.getVariables())
 		{	
+			//System.out.println("x");
 			//Check if variable is unassigned
 			if (!v.isAssigned())
 			{
