@@ -90,6 +90,8 @@ public class BTSolver
 							}
 						}
 					}
+					else
+						continue;
 					//Eliminate variable from its neighbor
 					neighborVar.removeValueFromDomain(v.getAssignment());
 					//if neighbor variable has no value after remove, then it is not consistent
@@ -150,7 +152,7 @@ public class BTSolver
 				}
 				int count = 0;
 				int uniqueValue = 0;
-				
+			
 				// For each value in the domain of v check it against the master set of neighbor domain values
 				for(Integer i : v.getValues())
 				{
@@ -188,7 +190,7 @@ public class BTSolver
 	 */
 	private boolean getTournCC ( )
 	{
-		return false;
+		return norvigCheck();
 	}
 
 	// =================================================================
@@ -258,7 +260,6 @@ public class BTSolver
 				neighborDomain.clear();
 			}
 		}
-		//System.out.println("Variable select: " + unassignedVar);
 		return unassignedVar;
 	}
 
@@ -418,7 +419,6 @@ public class BTSolver
 		}
 		else if (mrvList.size() == 1)
 			unassignedVar = mrvList.get(0);
-		//System.out.println("Variable select: " + unassignedVar);
 		return unassignedVar;
 	}
 
@@ -430,7 +430,7 @@ public class BTSolver
 	 */
 	private Variable getTournVar ( )
 	{
-		return null;
+		return getMRV();
 	}
 
 	// =================================================================
@@ -515,7 +515,7 @@ public class BTSolver
 	 */
 	public List<Integer> getTournVal ( Variable v )
 	{
-		return null;
+		return getValuesLCVOrder(v);
 	}
 
 	//==================================================================
