@@ -289,34 +289,9 @@ public class BTSolver
 			{	
 				//Go through the neighbors of the unassigned variable
 				for (Variable neighborVar : network.getNeighborsOfVariable(v))
-				{	
-					/*TEST
-					if (neighborVar.isAssigned())
-					{	
-						assignNeighborCount++;
-						int value = neighborVar.getAssignment();
-						if (trackUnassignVar.isEmpty())
-							trackUnassignVar.add(value);
-						else
-						{
-							//Prevent adding duplicate domain values 
-							boolean isDuplicate = false;
-							for (Integer unassignval: trackUnassignVar)
-							{
-								if (unassignval == value)
-								{
-									isDuplicate = true;
-									break;
-								}
-							}
-							if (!isDuplicate)
-								trackUnassignVar.add(value);
-						}
-					}
-					else*/ 
+				{
 					if (neighborVar.isAssigned())
 						assignNeighborCount++;
-						
 				}
 
 				//Select the variable with highest degree
@@ -422,6 +397,22 @@ public class BTSolver
 					else if (varSize == mrv)
 						mrvList.add(v);
 				}
+				/* previous version 
+				neighborCount = v.getDomain().size() - neighborDomain.size();
+				//Pick the variable with the smallest domain
+				if (neighborCount < mrv)
+				{
+					if (!mrvList.isEmpty())
+						mrvList.clear();
+					mrvList.add(v);
+					mrv = neighborCount;
+				}
+				//if the variable domain size are equal to mrv then add to mrv variable list
+				else if (neighborCount == mrv)
+					mrvList.add(v);
+				//Reset variables
+				neighborCount = 0;
+				*/
 				neighborDomain.clear();
 			}
 		}
