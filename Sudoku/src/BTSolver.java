@@ -140,56 +140,41 @@ public class BTSolver
 						// Find the unassigned neighbors
 						if(!neighbor.isAssigned())
 						{
-							
-							// if v and n have same domains there is no unique value in v's domain
-							if (v.getValues().equals(neighbor.getValues()))
+							// Go through the domains of all unassigned neighbors and add each domain value into the set (duplicates will not be insrted)
+							for(Integer i : neighbor.getValues())
 							{
-								continue;
-							}
-							
-							// Look for the unique value in v's domain
-							else
-							{
-								// for each element in v's domain
-								for(Integer vElement : v.getValues())
-								{
-									// If there is a match between element in v and element in n go to next element in v's domain
-									if(neighbor.getValues().contains(vElement))
-									{
-										continue;
-									}
-									
-									// Otherwise there is an element in v's domain not present in this particular neighbor so, add it to the set
-									else
-									{
-										set.add(vElement);
-									}
-								}
+								set.add(i);
 							}
 						}
-					}
-					
-					// if nothing was added to the set or if the set contains more than one element than for this v, we did not find a unique value to assign.
-					if(set.size() == 0 || set.size() > 1)
-					{
-						set.clear();
-						continue;
-					}
-					
-					// otherwise the set contains only one item and we assign v the value contained in the set.
-					else
-					{
-						int val = set.iterator().next(); // the single value contained in the set
-						trail.push(v);
-						v.removeValueFromDomain(val);
-						if(v.size() == 0)
-						{
-							return false;
-						}
-						v.assignValue(val);
-
 					}
 				}
+				int count = 0;
+				int uniqueValue = 0;
+				
+				// For each value in the domain of v check it against the master set of neighbor domain values
+				for(Integer i : v.getValues())
+				{
+					if(set.contains(i))
+					{
+						continue;
+					}
+					else
+					{
+						count++;
+						uniqueValue = i;
+					}
+				}
+				
+				// if only one value from v's domain is found to not match any value from the master set, assign v and forward check for consistency
+				if(count == 1)
+				{
+					v.assignValue(uniqueValue);
+					if(forwardChecking() == false)
+						return false;
+				}
+				count = 0;
+				uniqueValue = 0;
+				set.clear();
 			}
 		}
 		return true;
