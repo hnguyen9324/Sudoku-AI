@@ -216,7 +216,7 @@ public class BTSolver
 		Variable unassignedVar = null;
 		int mrv = 9999;
 		int neighborCount = 0;
-
+		int unassignVarSize = 0;
 		List<Integer> neighborDomain = new LinkedList<Integer>();
 		//Go through each variable and find the min variable size
 		//Select the smallest domain size
@@ -248,6 +248,7 @@ public class BTSolver
 						}
 					}
 				}
+				//version 1
 				neighborCount = v.getDomain().size() - neighborDomain.size();
 				//Pick the variable with the smallest domain
 				if (neighborCount < mrv)
@@ -317,7 +318,7 @@ public class BTSolver
 		int mrv = 9999;
 		int neighborCount = 0;
 		int degree = 0;
-		
+		int unassignVarSize = 0;
 		List<Integer> neighborDomain = new LinkedList<Integer>();
 		//Go through each variable and find the min variable size
 		//Select the smallest domain size
@@ -349,6 +350,8 @@ public class BTSolver
 						}
 					}
 				}
+				
+				//version 1
 				neighborCount = v.getDomain().size() - neighborDomain.size();
 				//Pick the variable with the smallest domain
 				if (neighborCount < mrv)
@@ -363,6 +366,7 @@ public class BTSolver
 					mrvList.add(v);
 				//Reset variables
 				neighborCount = 0;
+				
 				neighborDomain.clear();
 			}
 		}
