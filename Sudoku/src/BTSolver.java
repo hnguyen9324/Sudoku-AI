@@ -216,7 +216,6 @@ public class BTSolver
 		Variable unassignedVar = null;
 		int mrv = 9999;
 		int neighborCount = 0;
-		int unassignVarSize = 0;
 		List<Integer> neighborDomain = new LinkedList<Integer>();
 		//Go through each variable and find the min variable size
 		//Select the smallest domain size
@@ -248,7 +247,6 @@ public class BTSolver
 						}
 					}
 				}
-				//version 1
 				neighborCount = v.getDomain().size() - neighborDomain.size();
 				//Pick the variable with the smallest domain
 				if (neighborCount < mrv)
@@ -272,34 +270,45 @@ public class BTSolver
 	private Variable getDegree ( )
 	{
 		Variable unassignedVar = null;
-		int degree = 0;
-		int neighborCount = 0;
-		//Go through each variable and find the min variable size
-		//Select the smallest domain size and return
-		for(Variable v : network.getVariables())
-		{	
-			//System.out.println("x");
-			//Check if variable is unassigned
+		int unassignCount = -1;
+		//Go through all the variable in the board
+		for (Variable v: network.getVariables())
+		{
+			//if the variable is unassigned
 			if (!v.isAssigned())
 			{
-				//Go through the neighbors of the unassigned variable
-				for (Variable neighborVar : network.getNeighborsOfVariable(v))
-				{	
-					//count the unassigned neighbor
-					if (!neighborVar.isAssigned())
-						neighborCount++;
+				//create a List of unassigned variable
+				List<Variable> unassignList = new LinkedList<Variable>();
+				//get a list of the constraint variables of the unassigned variable 
+				List<Constraint> constraintList = network.getConstraintsContainingVariable(v);
+				for (Constraint c: constraintList)
+				{
+					List<Variable> cVar = c.vars;
+					for (Variable v2: cVar)
+					{
+						//if the variable is not the one looking at
+						if (!v2.getName().equals(v.getName()))
+						{
+							//if not assigned add to list
+							if (!v2.isAssigned())
+							{
+								if (unassignList.isEmpty())
+									unassignList.add(v2);
+								else if (!unassignList.contains(v2))
+									unassignList.add(v2);
+							}
+						}
+					}
 				}
-				//Pick the unassigned variable with highest degree
-				if (neighborCount > degree)
+				//select the unassigned variable if the degree is higher
+				if (unassignList.size() > unassignCount)
 				{
 					unassignedVar = v;
-					degree = neighborCount;
+					unassignCount = unassignList.size();
 				}
-				//System.out.println(v + " Count= " + neighborCount);
-				neighborCount = 0;
 			}
 		}
-		//System.out.println("Variable select: " + unassignedVar);
+		
 		return unassignedVar;
 	}
 
@@ -313,12 +322,9 @@ public class BTSolver
 	private Variable MRVwithTieBreaker ( )
 	{
 		Variable unassignedVar = null;
-		Variable mrvVar = null;
 		List<Variable> mrvList = new LinkedList<Variable>();
 		int mrv = 9999;
 		int neighborCount = 0;
-		int degree = 0;
-		int unassignVarSize = 0;
 		List<Integer> neighborDomain = new LinkedList<Integer>();
 		//Go through each variable and find the min variable size
 		//Select the smallest domain size
@@ -350,8 +356,6 @@ public class BTSolver
 						}
 					}
 				}
-				
-				//version 1
 				neighborCount = v.getDomain().size() - neighborDomain.size();
 				//Pick the variable with the smallest domain
 				if (neighborCount < mrv)
@@ -366,36 +370,51 @@ public class BTSolver
 					mrvList.add(v);
 				//Reset variables
 				neighborCount = 0;
-				
 				neighborDomain.clear();
 			}
 		}
-		boolean haveSelected = false;
+		//Do degree checking here as a tie breaker
 		if (mrvList.size() > 1)
-		{
-			//Get unassigned variable with the most unassigned neighbors by using degree check as a tie breaker
+		{	
+			int unassignCount = -1;
+			//Go through all the variable in the board
 			for (Variable v: mrvList)
 			{
-				//Count the neighbor of the variable selected by MRV
-				for (Variable neighborVar: network.getNeighborsOfVariable(v))
+				//if the variable is unassigned
+				if (!v.isAssigned())
 				{
-					if (!neighborVar.isAssigned())
-						neighborCount++;	
+					//create a List of unassigned variable
+					List<Variable> unassignList = new LinkedList<Variable>();
+					//get a list of the constraint variables of the unassigned variable 
+					List<Constraint> constraintList = network.getConstraintsContainingVariable(v);
+					for (Constraint c: constraintList)
+					{
+						List<Variable> cVar = c.vars;
+						for (Variable v2: cVar)
+						{
+							//if the variable is not the one looking at
+							if (!v2.getName().equals(v.getName()))
+							{
+								//if not assigned add to list
+								if (!v2.isAssigned())
+								{
+									if (unassignList.isEmpty())
+										unassignList.add(v2);
+									else if (!unassignList.contains(v2))
+										unassignList.add(v2);
+								}
+							}
+						}
+					}
+					//select the unassigned variable if the degree is higher
+					if (unassignList.size() > unassignCount)
+					{
+						unassignedVar = v;
+						unassignCount = unassignList.size();
+					}
 				}
-				//Select the variable that has the highest degree count
-				if (neighborCount > degree)
-				{
-					unassignedVar = v;
-					degree = neighborCount;
-				}
-				else if (neighborCount == 0 && !haveSelected)
-				{
-					unassignedVar = v;
-					degree = neighborCount;
-					haveSelected = true;
-				}
-				neighborCount = 0;
 			}
+			
 		}
 		else if (mrvList.size() == 1)
 			unassignedVar = mrvList.get(0);
