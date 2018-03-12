@@ -365,13 +365,12 @@ public class BTSolver
 				neighborDomain.clear();
 			}
 		}
-		
+		boolean haveSelected = false;
 		if (mrvList.size() > 1)
 		{
 			//Get unassigned variable with the most unassigned neighbors by using degree check as a tie breaker
 			for (Variable v: mrvList)
 			{
-				//System.out.println("MRV: " + v);
 				//Count the neighbor of the variable selected by MRV
 				for (Variable neighborVar: network.getNeighborsOfVariable(v))
 				{
@@ -383,6 +382,12 @@ public class BTSolver
 				{
 					unassignedVar = v;
 					degree = neighborCount;
+				}
+				else if (neighborCount == 0 && !haveSelected)
+				{
+					unassignedVar = v;
+					degree = neighborCount;
+					haveSelected = true;
 				}
 				neighborCount = 0;
 			}
